@@ -2,6 +2,7 @@
 
 const express = require("express");
 
+const { autho } = require("./middlewares/auth");
 const app = express();
 
 // If you will http://localhost:3000/, it will show "Hello Dev!" and if you will http://localhost:3000/hello, it will show Hello Dev! and if you will http://localhost:3000/test, it will show "Hello Dev!". If you will http://localhost:3000/trrtrdtdgfd write this then it will print hello dev!
@@ -76,17 +77,42 @@ app.get("/abc/:abcId/:name/:pass", (req, res) => {
 // });
 
 // This will print "This is first callback function" in console and then it will move to second callback function and print "This is second callback function" in console but it will throw error because we have use next() in second callback function and there is not any callback function after second callback function.
-app.get(
-  "/test",
-  (req, res, next) => {
-    console.log("This is first callback function");
-    next();
-  },
-  (req, res, next) => {
-    console.log("This is second callback function");
-    next();
-  },
-);
+// app.get(
+//   "/test",
+//   (req, res, next) => {
+//     console.log("This is first callback function");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("This is second callback function");
+//     next();
+//   },
+// );
+
+// app.use("/admin", (req, res, next) => {
+//   const token = "xyzzz";
+//   const isAuthoRized = token === "xyz";
+//   if (!isAuthoRized) {
+//     return res.status(401).send("Unauthorized");
+//   } else {
+//     next();
+//   }
+// });
+
+app.use("/admin", autho);
+
+app.get("/admin/getAllData", (req, res) => {
+  // const token = "xyzzz";
+  // const isAuthoRized = token === "xyz";
+  // if (!isAuthoRized) {
+  //   return res.status(401).send("Unauthorized");
+  // }
+  res.send("All data sent successfully");
+});
+
+app.get("/admin/deleteData", (req, res) => {
+  res.send("Data is successfully deleted");
+});
 
 app.listen(3000, () => {
   console.log("Server is successfully running");
