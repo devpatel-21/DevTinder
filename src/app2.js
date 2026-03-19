@@ -62,6 +62,41 @@ app2.get("/users", async (req, res) => {
   }
 });
 
+// To delete the user by id
+app2.delete("/deleteUser", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    // We can delete the user by both this way
+    const user = await User.findByIdAndDelete({ _id: userId });
+    // const user = await User.findByIdAndDelete(userId);
+    res.send("User is successfully deleted");
+  } catch (err) {
+    console.log("Error is:", err.message);
+    res.status(500).send("Something went wrong");
+  }
+});
+
+//To update the user
+app2.patch("/updateUser", async (req, res) => {
+  const userId = req.body.userId;
+  //   const updateData = req.body.updateData;
+  const data = req.body;
+  try {
+    // by default it will print old data
+    const user = await User.findByIdAndUpdate({ _id: userId }, data);
+
+    // It will print the updated user data
+    // const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+    //   returnDocument: "after",
+    // });
+    console.log(user);
+    res.send("User is successfully updated");
+  } catch (err) {
+    console.log("Error is:", err.message);
+    res.status(500).send("Something went wrong");
+  }
+});
+
 // We should always connect database before starting server because if we will start server before connecting database then if there is any error in connecting database then our server will be running but it will not be able to perform any database operation and it will throw error when we will try to perform any database operation. So it's always better to connect database first and then start server.
 connectDB()
   .then(() => {
