@@ -83,7 +83,9 @@ app2.patch("/updateUser", async (req, res) => {
   const data = req.body;
   try {
     // by default it will print old data
-    const user = await User.findByIdAndUpdate({ _id: userId }, data);
+    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+      runValidators: true,
+    });
 
     // It will print the updated user data
     // const user = await User.findByIdAndUpdate({ _id: userId }, data, {
