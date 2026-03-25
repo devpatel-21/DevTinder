@@ -81,7 +81,28 @@ app2.patch("/updateUser", async (req, res) => {
   const userId = req.body.userId;
   //   const updateData = req.body.updateData;
   const data = req.body;
+
   try {
+    const allowedUpdates = [
+      "firstname",
+      "lastname",
+      "password",
+      "hobbies",
+      "skills",
+      "userId",
+    ];
+
+    const isUpdateAllowed = Object.keys(data).every((key) =>
+      allowedUpdates.includes(key),
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error("Invalid updates");
+    }
+
+    if (data?.skills.length > 10) {
+      throw new Error("Skills cannot be greater then 10");
+    }
     // by default it will print old data
     const user = await User.findByIdAndUpdate({ _id: userId }, data, {
       runValidators: true,
