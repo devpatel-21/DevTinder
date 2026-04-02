@@ -4,6 +4,9 @@ const connectDB = require("./config/database");
 const app2 = express();
 
 const User = require("./models/user");
+const bcrypt = require("bcrypt");
+
+const { validateSignUpData } = require("./utils/validation");
 
 app2.use(express.json());
 
@@ -18,13 +21,24 @@ app2.post("/signup", async (req, res) => {
   //     age: 25,
   //     gender: "Male",
   //   };
-  const user = new User(req.body);
   try {
+    validateSignUpData(req);
+
+    const { firstname, lastname, email, password } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+    console.log(passwordHash);
+    const user = new User({
+      firstname,
+      lastname,
+      email,
+      password: passwordHash,
+    });
+
     await user.save();
     res.send("User is successfully created");
   } catch (err) {
     console.log("Error is:", err.message);
-    res.status(500).send("Something went wrong");
+    res.status(500).send("Something went wrong " + err.message);
   }
   //   console.log(req.body);
 });
