@@ -5,10 +5,13 @@ const app2 = express();
 
 const User = require("./models/user");
 const bcrypt = require("bcrypt");
-
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const { validateSignUpData } = require("./utils/validation");
+const { autho } = require("./middlewares/auth");
 
 app2.use(express.json());
+app2.use(cookieParser());
 
 // To create a new user
 app2.post("/signup", async (req, res) => {
@@ -41,6 +44,50 @@ app2.post("/signup", async (req, res) => {
     res.status(500).send("Something went wrong " + err.message);
   }
   //   console.log(req.body);
+});
+
+app2.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email: email });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    const isPasswordValid = await user.ValidatePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).send("Invalid credentials");
+    }
+
+    const token = await user.getJWT();
+    console.log(token);
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set cookie to expire in 1 day
+      httpOnly: true, // Cookie is only accessible through HTTP(S) requests, not JavaScript
+    });
+    res.send("Login successful");
+  } catch (err) {
+    console.log("Error is:", err.message);
+    res.status(500).send("Something went wrong " + err.message);
+  }
+});
+
+// app2.get("/Profile", async (req, res) => {
+//   const cookies = req.cookies;
+
+//   console.log(cookies);
+// });
+
+app2.get("/Profile", autho, async (req, res) => {
+  try {
+    const user = req.user;
+    res.send(user);
+  } catch (err) {
+    console.log("Error is:", err.message);
+    res.status(500).send("Something went wrong " + err.message);
+  }
 });
 
 // To find the user by email address
@@ -132,6 +179,13 @@ app2.patch("/updateUser", async (req, res) => {
     console.log("Error is:", err.message);
     res.status(500).send("Something went wrong");
   }
+});
+
+app2.post("/sendConnectionRequest", autho, async (req, res) => {
+  const user = req.user;
+  console.log("Send connection request API is called");
+
+  res.send(user.firstname + " send the Connection request.");
 });
 
 // We should always connect database before starting server because if we will start server before connecting database then if there is any error in connecting database then our server will be running but it will not be able to perform any database operation and it will throw error when we will try to perform any database operation. So it's always better to connect database first and then start server.
