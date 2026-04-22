@@ -17,8 +17,9 @@ connectionRequestRouter
 - post/request/review/accepted/:requestId
 - post/request/review/rejected/:requestId
 
+- /user/requests/received
 - get/connections
-- get/requests/received
+-
 - get/feed
 
 Status : ignore - accepeted - interested - rejected
