@@ -17,7 +17,8 @@ const autho = async (req, res, next) => {
 
     const { token } = cookies;
     if (!token) {
-      throw new Error("token is not valid");
+      // throw new Error("token is not valid");
+      return res.status(401).send("Please Login!");
     }
 
     const decodedToken = await jwt.verify(token, "82dj&&03DJ782");

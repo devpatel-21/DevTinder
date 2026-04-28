@@ -19,7 +19,16 @@ authRouter.post("/signup", async (req, res) => {
   try {
     validateSignUpData(req);
 
-    const { firstname, lastname, email, password } = req.body;
+    const {
+      firstname,
+      lastname,
+      email,
+      password,
+      age,
+      photoUrl,
+      gender,
+      skills,
+    } = req.body;
     const passwordHash = await bcrypt.hash(password, 10);
     console.log(passwordHash);
     const user = new User({
@@ -27,10 +36,21 @@ authRouter.post("/signup", async (req, res) => {
       lastname,
       email,
       password: passwordHash,
+      age,
+      photoUrl,
+      gender,
+      skills,
     });
 
-    await user.save();
-    res.send("User is successfully created");
+    const saveUser = await user.save();
+    const token = await saveUser.getJWT();
+    console.log(token);
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set cookie to expire in 1 day
+      httpOnly: true, // Cookie is only accessible through HTTP(S) requests, not JavaScript
+    });
+    res.json({ message: "User is successfully created", data: saveUser });
   } catch (err) {
     console.log("Error is:", err.message);
     res.status(500).send("Something went wrong " + err.message);
@@ -59,7 +79,7 @@ authRouter.post("/login", async (req, res) => {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set cookie to expire in 1 day
       httpOnly: true, // Cookie is only accessible through HTTP(S) requests, not JavaScript
     });
-    res.send("Login successful");
+    res.send(user);
   } catch (err) {
     console.log("Error is:", err.message);
     res.status(500).send("Something went wrong " + err.message);

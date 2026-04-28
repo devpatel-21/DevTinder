@@ -12,7 +12,14 @@ userRouter.get("/user/requests/received", autho, async (req, res) => {
     const allRequests = await ConnectionRequest.find({
       toUserId: loggedInUser._id,
       status: "interested",
-    }).populate("fromUserId", ["firstname", "lastname"]);
+    }).populate("fromUserId", [
+      "firstname",
+      "lastname",
+      "age",
+      "gender",
+      "about",
+      "photoUrl",
+    ]);
     res.json({ message: "Connection requests received", data: allRequests });
   } catch (err) {
     console.log("Error is:", err.message);
@@ -29,8 +36,9 @@ userRouter.get("/user/connections", autho, async (req, res) => {
         { toUserId: LoggedInUser._id, status: "accepted" },
       ],
     })
-      .populate("fromUserId", USER_SAFE_DATA)
-      .populate("toUserId", USER_SAFE_DATA);
+      .select("firstname lastname age gender photoUrl about")
+      .populate("fromUserId", "firstname lastname age gender photoUrl about")
+      .populate("toUserId", "firstname lastname age gender photoUrl about");
 
     const data = allConnections.map((row) => {
       if (row.fromUserId._id.toString() === LoggedInUser._id.toString()) {
@@ -84,7 +92,7 @@ userRouter.get("/feed", autho, async (req, res) => {
         { _id: { $ne: loggedInUser._id } },
       ],
     })
-      .select("firstname lastname")
+      .select("firstname lastname age photoUrl gender about skills")
       .skip(skip)
       .limit(limit);
     res.json({ message: "Feed", data: usersToShow });

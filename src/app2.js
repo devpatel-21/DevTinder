@@ -9,7 +9,14 @@ const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const { validateSignUpData } = require("./utils/validation");
 const { autho } = require("./middlewares/auth");
+const cors = require("cors");
 
+app2.use(
+  cors({
+    origin: "http://localhost:5173", // Replace with your frontend URL
+    credentials: true, // Allow cookies to be sent in cross-origin requests
+  }),
+);
 app2.use(express.json());
 app2.use(cookieParser());
 
